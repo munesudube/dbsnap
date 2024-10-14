@@ -1,0 +1,35 @@
+{
+  "name": "dbsnap",
+  "version": "1.0.0",
+  "description": "Database versioning tool. Used to take snapshots of your database tables and then restore any of the snapshots later.",
+  "main": "index.js",
+  "bin": {
+    "dbsnap": "./core/tool.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "database",
+    "migration",
+    "dump",
+    "restore",
+    "mysql",
+    "snapshots",
+    "versioning"
+  ],
+  "author": "Munesu Dube <dev.munesu@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "cli-progress": "^3.12.0",
+    "colors": "^1.4.0",
+    "commander": "^12.1.0",
+    "loading-cli": "^1.1.2",
+    "mysql2": "^3.11.3",
+    "prompt-sync": "^4.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/munesudube/dbsnap.git"
+  }
+}
