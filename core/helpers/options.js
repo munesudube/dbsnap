@@ -9,6 +9,7 @@ _module.common = function( cmd ){
     .option('--dbname <string>', 'database name')
     .option('--dbhost <string>', 'database host', 'localhost')
     .option('--port <number>', 'database port', '3306')
+    .option('--tables <string>', 'double-quoted comma-separated list of tables e.g --tables "users, products". It applies operations (snapshot/restore) to only the listed tables. Other tables will be ignored or left untouched')
     .argument('<name>', 'name of the snapshot')
 }
 
@@ -44,9 +45,15 @@ function fillDbOpts( options ){
     else return true;
 }
 
+function fillTablesOpt( options ){
+    if( options.tables ){ options.tables = options.tables.split(",").map(tableName => tableName.trim());}
+    else{ options.tables = null;}
+    return true;
+}
+
 _module.fill = function( options ){
     let success = true;
-    for(let func of [fillDbOpts]){
+    for(let func of [fillDbOpts, fillTablesOpt]){
         success = func(options);
         if(!success) break;
     }

@@ -26,7 +26,7 @@ class Column{
         const nullability = this.nullable?.toLowerCase() == "no" ? " NOT NULL" : " NULL";
         const collation = this.collation ? ` COLLATE '${this.collation}'` : "";
         let defVal = "";
-        if(this.defVal){
+        if(this.defVal != null){
             if( this.type == "longtext" || this.type == "enum" || this.type == "varchar" || this.type == "datetime" ) defVal = ` DEFAULT '${this.defVal}'`;
             else defVal = ` DEFAULT ${this.defVal}`;
         }       
@@ -34,9 +34,9 @@ class Column{
         return `${name}${type}${nullability}${defVal}${auto_increment}${collation}`;
     }
 
-    equal( column ){
+    equal( column ){        
         return this.name == column.name 
-        && this.defVal == column.defVal 
+        && this.defVal == column.defVal
         && this.nullable == column.nullable 
         && this.col_type == column.col_type
         && this.char_max_length == column.char_max_length

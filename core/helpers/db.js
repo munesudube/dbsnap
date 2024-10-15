@@ -96,9 +96,12 @@ db.getTableColumms = async function( tableName ){
     }, {});    
 }
 
-db.getTables = async function(){
+db.getTables = async function( filter ){
     let [tables, cols] = await this.query(`SELECT TABLE_NAME AS name, ENGINE as engine, TABLE_COLLATION as collation FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='${db.dbname}'`);
     tables = tables.map( table => new Table( table ) );
+    if( filter && filter.length ){
+        tables = tables.filter( _table => filter.find( _name => _table.name == _name ) );
+    }
 
     for(let table of tables){
         table.cols = await this.getTableColumms( table.name );

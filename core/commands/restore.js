@@ -3,9 +3,22 @@ const db = require("../helpers/db");
 const files = require("../helpers/files");
 const funcs = require("../helpers/funcs");
 
-async function restore( name, config ){
+async function restore( name, options ){
+    let config = files.getVersionConfig( name );
     let snaptables = files.getVersion( name );
-    let dbtables = await db.getTables();
+    let dbtables = await db.getTables( config.filter );
+
+    if( options.tables && options.tables.length ){
+        let _snaptables = {};
+        let _dbtables = {};
+        for(let tableName of options.tables){
+            if(!snaptables[tableName]) console.log("Warning:".yellow, "Table", tableName.yellow, "was not found in the database. Please note, to preserve the db as-is, table names are case-sensitive");
+            else _snaptables[tableName] = snaptables[tableName];
+            if( dbtables[tableName] ) _dbtables[tableName] = dbtables[tableName];
+        }
+        snaptables = _snaptables;
+        dbtables = _dbtables;
+    }
 
     changes = {
         additions: 0,
@@ -42,6 +55,7 @@ async function restore( name, config ){
         for(let colName in colsToCheck){
             let col = colsToCheck[colName];
             if( !col.equal( dbtable.cols[colName] ) ){
+                console.log( col, dbtable.cols[colName] );
                 await db.modifyColumn( table, col );
                 changes.modifications++;
             }

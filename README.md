@@ -26,6 +26,9 @@ To see a list of saved snapshots
 - Database credentials are stored in a file named **.dbsnap.json**, make sure to add it to **.gitignore** to avoid sharing credentials
 - Currently this only works for mysql databases
 - Currently this only tracks table structures and not the data within (updates will be coming soon to add this)
+- To snapshot only specific tables, use the **--tables** option. For example **--tables "user, roles, products"** will restrict snapshot and restore operations to only **user**, **roles**, and **products** tables. When restoring, it will not touch the other tables.
+- If you use the **--tables** option to take a snapshot, you do not have to use it again when restoring that snapshot. It will remember to only touch the tables in that snapshot.
+- If you make a full snapshot (i.e. no **--tables** options during **take** operation) you can restrict the tables to touch during a **restore** operation by using the **--tables** option (e.g. **> dbsnap restore v2.5.0 --tables "users, products"**)
 
 Feel free to contact me via **dev.munesu@gmail.com** if you run into any issues or have any questions.
 

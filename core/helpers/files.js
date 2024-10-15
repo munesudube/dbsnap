@@ -3,6 +3,7 @@ const path = require('path');
 const prompt = require('prompt-sync')({sigint: true});
 const funcs = require('./funcs');
 const { Table } = require('./db-classes');
+const colors = require("colors");
 
 const _module = {};
 _module.dirName = ".dbsnap";
@@ -14,13 +15,14 @@ _module.versPath = function( name ){
     return path.join( this.versDirPath, `${name}` );
 }
 
-_module.jsonRead = function( path ){
+_module.jsonRead = function( path, defObj = {} ){
     if( fs.existsSync( path ) ) return JSON.parse( fs.readFileSync( path ) );
-    return {};
+    return defObj;
 }
 
 _module.jsonWrite = function( path, obj ){
     fs.writeFileSync( path, JSON.stringify( obj ) );
+    return true;
 }
 
 _module.loadConfig = function(){
@@ -46,7 +48,7 @@ _module.deleteVersion = function( name ){
     fs.rmSync( this.versPath( name ), { recursive: true } );
 }
 
-_module.saveVersion = function( name, tables, force = false ){
+_module.saveVersion = function( name, tables, config = {}, force = false ){
     this.init();
     if( this.versionExists( name ) ){
         if( !force ){
@@ -59,10 +61,18 @@ _module.saveVersion = function( name, tables, force = false ){
     for(let table in tables){
         this.jsonWrite( path.join( versPath, `${table}.table.json` ), tables[table] );
     }
+    this.jsonWrite( path.join( versPath, `config.json` ), config );
 }
 
 _module.getVersionNames = function(){
     return fs.readdirSync( this.versDirPath );
+}
+
+_module.getVersionConfig = function( name ){
+    this.init();
+    if( !this.versionExists( name ) ) return null;
+    let versPath = this.versPath( name );
+    return this.jsonRead( path.join( versPath, "config.json" ), {  filter: null });
 }
 
 _module.getVersion = function( name ){
