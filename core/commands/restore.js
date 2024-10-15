@@ -58,7 +58,6 @@ async function restore( name, options ){
         for(let colName in colsToCheck){
             let col = colsToCheck[colName];
             if( !col.equal( dbtable.cols[colName] ) ){
-                console.log( col, dbtable.cols[colName] );
                 await db.modifyColumn( table, col );
                 changes.modifications++;
             }
