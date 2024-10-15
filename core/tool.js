@@ -11,8 +11,18 @@ program
   .description('Database versioning tool. Used to take snapshots of your database tables and then restore any of the snapshots later. Currently only works for mysql')
   .version('1.0.0');
 
-helpers.options.common( program.command("take") )
+program.command("take")
   .description("Take a snapshot of the database")
+  .option('-u, --username <string>', 'database user name')
+  .option('--password <string>', 'database user password')
+  .option('--dbname <string>', 'database name')
+  .option('--dbhost <string>', 'database host', 'localhost')
+  .option('--port <number>', 'database port', '3306')
+  .option('--tables <string>', 'double-quoted comma-separated list of tables e.g --tables "users, products". It snapshots only the listed tables. Other tables will be ignored')
+  .option('--data <string>', 'double-quoted comma-separated list of tables for which to save the table data or rows')
+  .option('--all', 'include all tables and data')
+  .option('--with-data', 'include data for all tables listed')
+  .argument('<name>', 'name of the snapshot')
   .action(function( name, options ){
     if( helpers.options.fill( options ) ){
       commands.take( name, options );
@@ -20,8 +30,17 @@ helpers.options.common( program.command("take") )
     else console.log("Aborted!".red);     
   });
 
-helpers.options.common( program.command("restore") )
+program.command("restore")
   .description("Restore database from snapshot")
+  .option('-u, --username <string>', 'database user name')
+  .option('--password <string>', 'database user password')
+  .option('--dbname <string>', 'database name')
+  .option('--dbhost <string>', 'database host', 'localhost')
+  .option('--port <number>', 'database port', '3306')
+  .option('--tables <string>', 'double-quoted comma-separated list of tables e.g --tables "users, products". It restores only the listed tables. Other tables will be ignored')
+  .option('--data <string>', 'double-quoted comma-separated list of tables for which to restore the table data or rows')
+  .option('--no-data', 'do not restore data')
+  .argument('<name>', 'name of the snapshot')
   .action(function(name, options ){
     if( helpers.options.fill( options ) ){
       commands.restore( name, options );
@@ -29,14 +48,19 @@ helpers.options.common( program.command("restore") )
     else console.log("Aborted".red);        
   });
 
-  helpers.options.common( program.command("set") )
-  .description("Set options for reuse in the current directory i.e. everytime you run the tool in current directory, the specified option value will be used e.g. username, password")
+program.command("set")
+  .description("Set database parameters. (Note: they are set per directory)")
+  .option('-u, --username <string>', 'database user name')
+  .option('--password <string>', 'database user password')
+  .option('--dbname <string>', 'database name')
+  .option('--dbhost <string>', 'database host', 'localhost')
+  .option('--port <number>', 'database port', '3306')
   .action(function( options ){  
     commands.set( options );        
   });
 
   program.command("get")
-    .description("Get options set for current directory")
+    .description("Get databaset parameters")
     .option('--username', 'database user name')
     .option('--password', 'database user password')
     .option('--dbname', 'database name')
@@ -47,7 +71,7 @@ helpers.options.common( program.command("restore") )
     });
 
 program.command("unset")
-  .description("Get options set for current directory")
+  .description("Unset database parameters")
   .option('--username', 'database user name')
   .option('--password', 'database user password')
   .option('--dbname', 'database name')

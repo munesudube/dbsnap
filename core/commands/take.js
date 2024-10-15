@@ -9,10 +9,20 @@ const path = require("path");
 async function take( name, options ){
     let dbtables = await db.getTables();
     let config = {
-        filter: options.tables && options.tables.length ? options.tables : null,
-        data: options.data && options.data.length ? options.data : null
+        filter: options.tables && options.tables.length && !options.all ? options.tables : null,
+        data: options.data && options.data.length && !options.all ? options.data : null,
+        all: options.all ? true : false
     };
-    if( config.filter ){
+
+    if( options.withData ){        
+        if( config.filter ) config.data = config.filter;
+        else{
+            config.data = [];
+            for(let tableName in dbtables) config.data.push( tableName );
+        }        
+    }
+
+    if( config.filter && !config.all ){
         let _dbtables = {};
         for( let tableName of config.filter ){
             if( !dbtables[tableName] ){
@@ -27,12 +37,20 @@ async function take( name, options ){
     if( funcs.isEmpty( dbtables ) ){
         console.log( "Nothing to snapshot".yellow );
     }
-    else{
+    else{      
         files.saveVersion( name, dbtables, config, false );
-        if( config.data ){
+
+        let withData = config.data;
+
+        if( config.all ){
+            withData = [];
+            for(let tableName in dbtables) withData.push( tableName );
+        }
+
+        if( withData ){
             let versPath = files.versPath( name );
             let hasNewLine = /[\n]+/;
-            for(let tableName of config.data){
+            for(let tableName of withData){
                 if(!dbtables[tableName]) continue;
                 let table = dbtables[tableName];
                 let writer = fs.createWriteStream( path.join( versPath, `${tableName}.data` )  );

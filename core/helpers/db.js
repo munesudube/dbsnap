@@ -10,7 +10,14 @@ db.connect = async function( creds ){
             host: creds.dbhost,
             user: creds.username,
             password: creds.password,
-            database: creds.dbname
+            database: creds.dbname,
+            typeCast: function( field, useDefaultTypeCasting ) {
+                if ( ( field.type === "BIT" ) && ( field.length === 1 ) ) {
+                    var bytes = field.buffer();
+                    return( bytes[ 0 ] === 1 );
+                }
+                return( useDefaultTypeCasting() );
+            }
         });
         this.dbname = creds.dbname;
     }

@@ -12,6 +12,8 @@ _module.common = function( cmd ){
     .option('--tables <string>', 'double-quoted comma-separated list of tables e.g --tables "users, products". It applies operations (snapshot/restore) to only the listed tables. Other tables will be ignored or left untouched')
     .option('--data <string>', 'double-quoted comma-separated list of tables for which to save the table data or rows')
     .option('--no-data', 'do not snapshot/restore')
+    .option('--all', 'include all tables and data')
+    .options('--with-data', 'include data for all tables listed')
     .argument('<name>', 'name of the snapshot')
 }
 
@@ -105,7 +107,7 @@ _module.unset = function( opts ){
             }
         }
         else{
-            console.log(`${fileName} does not exist`.red)
+            console.log(`${fileName} does not exist`.red);
         }        
         return true;
     }

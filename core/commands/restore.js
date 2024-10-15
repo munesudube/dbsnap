@@ -4,14 +4,17 @@ const files = require("../helpers/files");
 const funcs = require("../helpers/funcs");
 const path = require("path");
 const LineReader = require('n-readlines');
+const loading =  require('loading-cli');
 
 
 async function restore( name, options ){
     let config = files.getVersionConfig( name );
     let snaptables = files.getVersion( name );
-    let dbtables = await db.getTables( config.filter );
+    let dbtables = await db.getTables( !options.all && config.filter );
 
-    if( options.tables && options.tables.length ){
+    let _OPTALL = config.all || options.all;
+
+    if( options.tables && options.tables.length && !_OPTALL ){
         let _snaptables = {};
         let _dbtables = {};
         for(let tableName of options.tables){
@@ -65,18 +68,28 @@ async function restore( name, options ){
         
     }
 
-    if( config.data && config.data.length && !options.noData ){
-        for(let tableName of config.data){
-            if(options.data && options.data.length && !options.data.find(_tableName => tableName)) continue;
+    if( (config.data && config.data.length && !options.noData) || (_OPTALL && !options.noData) ){
+        let withData = config.data;
+        if( _OPTALL ){
+            withData = [];
+            for( let tableName in snaptables ) withData.push( tableName );
+        }
+        for(let tableName of withData){
+            if( !_OPTALL && options.data && options.data.length && !options.data.find(_tableName => tableName)) continue;
             if( snaptables[tableName] ){
                 let table = snaptables[tableName];
                 let versPath = files.versPath( name );
                 let tableConfig = files.jsonRead( path.join(versPath, `${tableName}.config.json` ), { total: 0 } );
+                let loader = loading( `${tableName}:`.green + ` restoring ${tableConfig.total} rows` );
+                loader.frame(["|", "/", "-", "\\"]);
+                loader.color = "green";
+                loader.start();
                 db.truncateTable( table );
                 const lineReader = new LineReader( path.join(versPath, `${tableName}.data` ) );
                 let line;
                 let data = "";
                 let depth = 0;
+                let restored = 0;
                 while (line = lineReader.next()) {
                     let _line = line;
                     if( _line == "<@dbsnap row>" ){ depth++; continue; }
@@ -102,9 +115,12 @@ async function restore( name, options ){
                         if( row ){
                              await db.insertRow( table, row );
                              changes.additions++;
+                             restored++;
                         }
                     }
                 }
+                loader.stop();
+                console.log( `${tableName}:`.green, `restored ${restored} rows` );
             }
         }
     }
