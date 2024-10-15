@@ -1,7 +1,7 @@
 {
   "name": "dbsnap",
-  "version": "1.0.1",
-  "description": "Database versioning tool. Used to take snapshots of your database tables and then restore any of the snapshots later.",
+  "version": "1.0.2",
+  "description": "Database versioning tool. Used to take snapshots of your database tables (and optionally data) and then restore any of the snapshots later.",
   "main": "index.js",
   "bin": {
     "dbsnap": "./core/tool.js"
@@ -26,6 +26,7 @@
     "commander": "^12.1.0",
     "loading-cli": "^1.1.2",
     "mysql2": "^3.11.3",
+    "n-readlines": "^1.0.1",
     "prompt-sync": "^4.2.0"
   },
   "repository": {

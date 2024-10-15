@@ -2,6 +2,9 @@ const colors = require("colors");
 const db = require("../helpers/db");
 const files = require("../helpers/files");
 const funcs = require("../helpers/funcs");
+const path = require("path");
+const LineReader = require('n-readlines');
+
 
 async function restore( name, options ){
     let config = files.getVersionConfig( name );
@@ -61,6 +64,50 @@ async function restore( name, options ){
             }
         }
         
+    }
+
+    if( config.data && config.data.length && !options.noData ){
+        for(let tableName of config.data){
+            if(options.data && options.data.length && !options.data.find(_tableName => tableName)) continue;
+            if( snaptables[tableName] ){
+                let table = snaptables[tableName];
+                let versPath = files.versPath( name );
+                let tableConfig = files.jsonRead( path.join(versPath, `${tableName}.config.json` ), { total: 0 } );
+                db.truncateTable( table );
+                const lineReader = new LineReader( path.join(versPath, `${tableName}.data` ) );
+                let line;
+                let data = "";
+                let depth = 0;
+                while (line = lineReader.next()) {
+                    let _line = line;
+                    if( _line == "<@dbsnap row>" ){ depth++; continue; }
+                    else if( _line == "<@dbsnap endrow>" ){ depth--; }
+                    else{ data += _line; }
+
+                    if( depth == 0 ){
+                        let row = null;
+                        try{
+                            row = JSON.parse( data.replaceAll("'", "''") );                            
+                        }
+                        catch(err){
+                            console.log("Warning:".yellow, "Some data could not be inserted");
+                            console.log(`Error: ${err.message}`.red);
+                            console.log();
+                            console.log( data );
+                            console.log();
+                        }
+                        finally{
+                            data = "";
+                        }
+                        
+                        if( row ){
+                             await db.insertRow( table, row );
+                             changes.additions++;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     if(changes.additions || changes.deletions || changes.modifications){

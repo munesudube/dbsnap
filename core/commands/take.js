@@ -2,12 +2,15 @@ const colors = require("colors");
 const db = require("../helpers/db");
 const files = require("../helpers/files");
 const funcs = require("../helpers/funcs");
+const fs = require("fs");
+const path = require("path");
 
 
 async function take( name, options ){
     let dbtables = await db.getTables();
     let config = {
-        filter: options.tables && options.tables.length ? options.tables : null 
+        filter: options.tables && options.tables.length ? options.tables : null,
+        data: options.data && options.data.length ? options.data : null
     };
     if( config.filter ){
         let _dbtables = {};
@@ -26,6 +29,33 @@ async function take( name, options ){
     }
     else{
         files.saveVersion( name, dbtables, config, false );
+        if( config.data ){
+            let versPath = files.versPath( name );
+            let hasNewLine = /[\n]+/;
+            for(let tableName of config.data){
+                if(!dbtables[tableName]) continue;
+                let table = dbtables[tableName];
+                let writer = fs.createWriteStream( path.join( versPath, `${tableName}.data` )  );
+                let numRows = 0;
+                await db.allRows( table, function( row ){
+                    let data = JSON.stringify( row );
+                    if( hasNewLine.test( data ) ){
+                        writer.write( "<@dbsnap row>\n" );
+                        writer.write( data );
+                        writer.write( "\n" );
+                        writer.write( "<@dbsnap endrow>\n" );
+                    }
+                    else{
+                        writer.write( data );
+                        writer.write( "\n" );
+                    }     
+                    numRows++;               
+                });
+                writer.close();
+                files.jsonWrite( path.join(versPath, `${tableName}.config.json`), { total: numRows } );
+            }
+        }
+        
     }        
 }
 

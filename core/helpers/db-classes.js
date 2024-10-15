@@ -62,7 +62,7 @@ class Table{
         }
     }
 
-    //Returns an array of columns order by position
+    //Returns an array of columns ordered by position
     get columns(){        
         let cols = [];
         let _cols = [];
@@ -76,6 +76,10 @@ class Table{
             _cols = _cols.filter(col => col.name != min.name);
         }
         return cols;
+    }
+
+    get priColumns(){
+        return this.columns.filter( col => col.col_key.toLowerCase() == "pri" );
     }
 
     //Returns sql to create table

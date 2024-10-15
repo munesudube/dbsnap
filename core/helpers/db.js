@@ -50,7 +50,7 @@ db.query = async function(query, params){
         else{
             db.conn.query(query, function (error, results, fields) {
                 if (error){
-                    reject(error.sqlMessage);
+                    reject(error.sqlMessage || error.message || error);
                 }
                 else{
                     resolve( [results, fields] );
@@ -143,6 +143,62 @@ db.dropColumn = async function( table, column ){
 db.modifyColumn = async function( table, column ){
     console.log( "+".yellow + `Modifying column ${column.name.yellow} *=> ${table.name.green}` );
     let [results, fields] = await this.query( `ALTER TABLE ${table.name} MODIFY COLUMN ${column.createSql()}` );
+}
+
+db.countRows = async function( table ){
+    let [results, fields] = await this.query( `select count(*) as total from ${table.name};` );
+    return Number( results[0].total );
+}
+
+db.getRows = async function( sql ){
+    let [results, fields] = await this.query( sql );
+    return results && results.length ? results : [];
+}
+
+db.allRows = async function(table, callback, limit = 1000){
+    if( !table || !callback ) return;
+    let page = 1;
+    let maxPages = Math.ceil( await this.countRows( table ) / limit );
+    let priCols = table.priColumns.map( col => col.name );
+    let orderBy = priCols.length ? ` ORDER BY ${priCols.join(", ")}` : "";    
+    while(page <= maxPages){
+        let offset = (page - 1) * limit; 
+        let sql = `SELECT * FROM ${table.name}${orderBy} LIMIT ${limit} OFFSET ${offset};`;
+        let rows = await this.getRows( sql );        
+        for(let row of rows){
+            callback( row );
+        }       
+        page++;
+    }
+}
+
+db.truncateTable = async function( table ){
+    let [results, fields] = await this.query( `TRUNCATE TABLE ${table.name};` );
+    return results.rowsAffected;
+}
+
+db.insertRow = async function( table, row ){
+    let colNames = [];
+    let colValues = [];
+    Object.keys( row ).forEach(function(key){
+        let val = row[key];
+        if( typeof val == "string" ) val = `'${val}'`;
+        else if( val == null ) val = 'NULL';
+        colNames.push( key );
+        colValues.push( val );
+    });
+
+    let sql = `INSERT INTO ${table.name} (${colNames.join(', ')}) values(${colValues.join(', ')});`;
+
+    try{
+        let [results, fields] = await this.query( sql );
+        return results.rowsAffected;
+    }
+    catch(err){
+        console.log( row, sql );
+        throw err;
+    }
+    
 }
 
 

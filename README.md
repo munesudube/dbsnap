@@ -1,5 +1,5 @@
 # Db snap
-Database versioning tool. Used to take snapshots of your database tables and then restore any of the snapshots later. It works by saving the state of your database in files then later using those files to restore the same state. Although this tool is fully capable of tracking your database changes and snapshots, you may choose to also commit the tracking files in **git**.
+Database versioning tool. Used to take snapshots of your database tables (and optionally data) and then restore any of the snapshots later. It works by saving the state of your database in files then later using those files to restore the same state. Although this tool is fully capable of tracking your database changes and snapshots, you may choose to also commit the tracking files in **git**.
 
 ## Installation
 **> npm install dbsnap**
@@ -25,10 +25,11 @@ To see a list of saved snapshots
 - **dbsnap** saves snapshots in a subfolder named **.dbsnap** add this to **git** if you want to track with **git**
 - Database credentials are stored in a file named **.dbsnap.json**, make sure to add it to **.gitignore** to avoid sharing credentials
 - Currently this only works for mysql databases
-- Currently this only tracks table structures and not the data within (updates will be coming soon to add this)
 - To snapshot only specific tables, use the **--tables** option. For example **--tables "user, roles, products"** will restrict snapshot and restore operations to only **user**, **roles**, and **products** tables. When restoring, it will not touch the other tables.
 - If you use the **--tables** option to take a snapshot, you do not have to use it again when restoring that snapshot. It will remember to only touch the tables in that snapshot.
 - If you make a full snapshot (i.e. no **--tables** options during **take** operation) you can restrict the tables to touch during a **restore** operation by using the **--tables** option (e.g. **> dbsnap restore v2.5.0 --tables "users, products"**)
+- To snapshot table data, use **--data** option to specify a list of tables for which you want the data included. For example **--data "user, roles, products"** will ensure that when snapshoting or restoring **user**, **roles**, and **products** tables, their data is included as well 
+- **--data** works in a similar fashion to **--tables** i.e. it is not required when restoring tables. By default snapshots that include data will restore that data as well
 
 Feel free to contact me via **dev.munesu@gmail.com** if you run into any issues or have any questions.
 
