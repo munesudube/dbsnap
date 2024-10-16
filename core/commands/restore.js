@@ -84,7 +84,7 @@ async function restore( name, options ){
                 loader.frame(["|", "/", "-", "\\"]);
                 loader.color = "green";
                 loader.start();
-                db.truncateTable( table );
+                await db.truncateTable( table );
                 const lineReader = new LineReader( path.join(versPath, `${tableName}.data` ) );
                 let line;
                 let data = "";
@@ -157,7 +157,7 @@ module.exports = async function( name, config ){
         await db.connect( config );
         await restore( name, config );
     }
-    catch(error){
+    catch(error){        
         if(typeof error == "string") console.log( error.red );
         if(typeof error == "object"){
             if(typeof error.message == "string") console.log( error.message.red );

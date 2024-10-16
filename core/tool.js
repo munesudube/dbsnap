@@ -9,7 +9,7 @@ const program = new Command();
 program
   .name('dbsnap')
   .description('Database versioning tool. Used to take snapshots of your database tables and then restore any of the snapshots later. Currently only works for mysql')
-  .version('1.0.0');
+  .version('1.0.6');
 
 program.command("take")
   .description("Take a snapshot of the database")

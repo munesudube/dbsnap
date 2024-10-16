@@ -27,7 +27,7 @@ function getCreds(){
 
 function fillDbOpts( options ){
     function someMissing(){
-        return !options.username || !options.password || !options.dbname || !options.port || !options.dbhost;
+        return !options.username || !options.dbname || !options.port || !options.dbhost;
     }
     if( someMissing() ){
         const creds = getCreds() || {};
@@ -39,7 +39,7 @@ function fillDbOpts( options ){
         //Check again
         if( someMissing() ){
             const missing = [];
-            for(let dbOpt of ["username", "password", "dbname", "port", "dbhost"]){
+            for(let dbOpt of ["username", "dbname", "port", "dbhost"]){
                 if(!options[dbOpt]) missing.push( dbOpt );
             }
             console.log( ("Db options missing: " + missing.join(", ")).red );

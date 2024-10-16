@@ -1,6 +1,6 @@
 {
   "name": "dbsnap",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Database versioning tool. Used to take snapshots of your database tables (and optionally data) and then restore any of the snapshots later.",
   "main": "index.js",
   "bin": {

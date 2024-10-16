@@ -9,7 +9,7 @@ db.connect = async function( creds ){
         this.conn = mysql.createConnection({
             host: creds.dbhost,
             user: creds.username,
-            password: creds.password,
+            password: creds.password || "",
             database: creds.dbname,
             typeCast: function( field, useDefaultTypeCasting ) {
                 if ( ( field.type === "BIT" ) && ( field.length === 1 ) ) {
@@ -144,7 +144,7 @@ db.addColumn = async function( table, column ){
 
 db.dropColumn = async function( table, column ){
     console.log( "+".red + `Dropping column ${column.name.red} <= ${table.name.green}` );
-    let [results, fields] = await this.query( `ALTER TABLE ${table.name} DROP COLUMN ${column.name}` );
+    let [results, fields] = await this.query( `ALTER TABLE ${table.name} DROP COLUMN \`${column.name}\`` );
 }
 
 db.modifyColumn = async function( table, column ){
@@ -166,7 +166,7 @@ db.allRows = async function(table, callback, limit = 1000){
     if( !table || !callback ) return;
     let page = 1;
     let maxPages = Math.ceil( await this.countRows( table ) / limit );
-    let priCols = table.priColumns.map( col => col.name );
+    let priCols = table.priColumns.map( col => '`' + col.name + '`' );
     let orderBy = priCols.length ? ` ORDER BY ${priCols.join(", ")}` : "";    
     while(page <= maxPages){
         let offset = (page - 1) * limit; 
@@ -188,9 +188,14 @@ db.insertRow = async function( table, row ){
     let colNames = [];
     let colValues = [];
     Object.keys( row ).forEach(function(key){
+        let col = table.cols[key];
+
         let val = row[key];
         if( typeof val == "string" ) val = `'${val}'`;
-        else if( val == null ) val = 'NULL';
+        else if( val == null ){
+            if( col?.nullable.toLowerCase() == "yes" ) val = 'NULL';
+            else return; //Skip it if it is not nullable, database will use default
+        }
         colNames.push( "`" + key + "`" );
         colValues.push( val );
     });
