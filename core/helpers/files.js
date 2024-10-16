@@ -65,6 +65,7 @@ _module.saveVersion = function( name, tables, config = {}, force = false ){
 }
 
 _module.getVersionNames = function(){
+    this.init();
     return fs.readdirSync( this.versDirPath );
 }
 

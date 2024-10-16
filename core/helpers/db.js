@@ -191,7 +191,7 @@ db.insertRow = async function( table, row ){
         let val = row[key];
         if( typeof val == "string" ) val = `'${val}'`;
         else if( val == null ) val = 'NULL';
-        colNames.push( key );
+        colNames.push( "`" + key + "`" );
         colValues.push( val );
     });
 

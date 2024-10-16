@@ -112,11 +112,19 @@ async function restore( name, options ){
                             data = "";
                         }
                         
-                        if( row ){
-                             await db.insertRow( table, row );
-                             changes.additions++;
-                             restored++;
+                        try{
+                            if( row ){
+                                await db.insertRow( table, row );
+                                changes.additions++;
+                                restored++;
+                           }
                         }
+                        catch(err){
+                            loader.stop();
+                            console.log(`Error: ${err.message}`.red);
+                            throw err;
+                        }
+                        
                     }
                 }
                 loader.stop();

@@ -2,7 +2,7 @@
 Database versioning tool. Used to take snapshots of your database tables (and optionally data) and then restore any of the snapshots later. It works by saving the state of your database in files then later using those files to restore the same state. Although this tool is fully capable of tracking your database changes and snapshots, you may choose to also commit the tracking files in **git**.
 
 ## Installation
-**> npm install dbsnap**
+**> npm install -g dbsnap**
 
 ## Example Usage
 Go to your project folder or where you would like the snapshots to be saved

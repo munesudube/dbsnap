@@ -27,7 +27,7 @@ class Column{
         const collation = this.collation ? ` COLLATE '${this.collation}'` : "";
         let defVal = "";
         if(this.defVal != null){
-            if( this.type == "longtext" || this.type == "enum" || this.type == "varchar" || this.type == "datetime" ) defVal = ` DEFAULT '${this.defVal}'`;
+            if( this.type == "longtext" || this.type == "enum" || this.type == "varchar" || this.type == "datetime" || this.type == 'char' ) defVal = ` DEFAULT '${this.defVal}'`;
             else defVal = ` DEFAULT ${this.defVal}`;
         }       
         const auto_increment = this.auto_increment ? " AUTO_INCREMENT" : "";
