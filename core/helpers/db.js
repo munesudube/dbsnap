@@ -157,6 +157,33 @@ db.countRows = async function( table ){
     return Number( results[0].total );
 }
 
+function toDateString( date ){
+    const month = date.getMonth() + 1;
+    let MM = month < 10 ? "0" + month : month;
+    let DD = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+    let HH = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+    let mm = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+    let ss = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+    return `${date.getFullYear()}-${MM}-${DD} ${HH}:${mm}:${ss}`;
+}
+
+function dbRow( table, row ){
+    for(let prop in row){
+        if( table?.cols[prop] ){
+            let col = table.cols[prop];
+            if( col.type == "timestamp" ){
+                if( row[prop] instanceof Date && row[prop].getTime() ){
+                    row[prop] = toDateString( row[prop] );                  
+                }
+                else{
+                    row[prop] = null;
+                }
+            }
+        }
+    }
+    return row;
+}
+
 db.getRows = async function( sql ){
     let [results, fields] = await this.query( sql );
     return results && results.length ? results : [];
@@ -172,8 +199,8 @@ db.allRows = async function(table, callback, limit = 1000){
         let offset = (page - 1) * limit; 
         let sql = `SELECT * FROM ${table.name}${orderBy} LIMIT ${limit} OFFSET ${offset};`;
         let rows = await this.getRows( sql );        
-        for(let row of rows){
-            callback( row );
+        for(let row of rows){            
+            callback( dbRow(table, row) );
         }       
         page++;
     }

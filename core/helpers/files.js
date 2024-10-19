@@ -52,7 +52,9 @@ _module.saveVersion = function( name, tables, config = {}, force = false ){
     this.init();
     if( this.versionExists( name ) ){
         if( !force ){
-            if(!funcs.confirm( "This will override the existing " + name.yellow + ", continue?" )) return false;
+            if(!funcs.confirm( "This will override the existing " + name.yellow + ", continue?" )){
+                throw new Error("Aborted!");
+            }
         }        
         this.deleteVersion( name );
     }
